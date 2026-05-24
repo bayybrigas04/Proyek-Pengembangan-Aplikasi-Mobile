@@ -3,29 +3,13 @@ package com.example.sholatyuk.presentation.navigation
 import kotlinx.serialization.Serializable
 
 sealed interface Route {
-    
+
     @Serializable
     data object Home : Route
-    
+
     @Serializable
-    data class AddNote(val noteId: Long? = null) : Route
-    
+    data object Shalat : Route
+
     @Serializable
-    data class NoteDetail(val noteId: Long) : Route
-    
-    @Serializable
-    data class AIAssistant(
-        val noteId: Long? = null,
-        val initialText: String? = null
-    ) : Route
+    data object IslamAI : Route
 }
-
-interface NavigationActions {
-    fun navigateToHome()
-    fun navigateToAddNote(noteId: Long? = null)
-    fun navigateToNoteDetail(noteId: Long)
-    fun navigateToAIAssistant(noteId: Long? = null, initialText: String? = null)
-    fun navigateBack()
-}
-
-
