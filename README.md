@@ -1,7 +1,5 @@
 # 🌙 SholatYuk - Aplikasi Islam Lengkap
 
-[![CI](https://github.com/bayybrigas04/Proyek-Pengembangan-Aplikasi-Mobile/actions/workflows/ci.yml/badge.svg)](https://github.com/bayybrigas04/Proyek-Pengembangan-Aplikasi-Mobile/actions)
-
 Aplikasi **Islam modern** yang membantu umat Muslim menjalankan ibadah dengan lebih mudah, tepat, dan khusyuk. Dibangun menggunakan **Kotlin Multiplatform (KMP)** & **Compose Multiplatform**.
 
 Aplikasi ini dikembangkan sebagai Tugas Besar (Tubes) mata kuliah **Pengembangan Aplikasi Mobile** - Institut Teknologi Sumatera (ITERA).
