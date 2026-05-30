@@ -27,7 +27,8 @@ import com.example.sholatyuk.presentation.theme.*
 @Composable
 fun PrayerScreen(
     onNavigateToHome: () -> Unit = {},
-    onNavigateToIslamAI: () -> Unit = {}
+    onNavigateToIslamAI: () -> Unit = {},
+    onNavigateToDoa: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -60,6 +61,7 @@ fun PrayerScreen(
                 currentRoute = "shalat",
                 onHomeClick = onNavigateToHome,
                 onShalatClick = {},
+                onDoaClick = onNavigateToDoa, // Ini bagian yang ditambahkan
                 onIslamAIClick = onNavigateToIslamAI
             )
         },

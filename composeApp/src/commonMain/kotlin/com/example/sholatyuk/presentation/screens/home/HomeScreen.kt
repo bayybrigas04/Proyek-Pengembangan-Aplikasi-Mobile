@@ -27,6 +27,7 @@ import com.example.sholatyuk.presentation.theme.*
 @Composable
 fun HomeScreen(
     onNavigateToShalat: () -> Unit = {},
+    onNavigateToDoa: () -> Unit = {},
     onNavigateToIslamAI: () -> Unit = {}
 ) {
     Scaffold(
@@ -35,6 +36,7 @@ fun HomeScreen(
                 currentRoute = "home",
                 onHomeClick = {},
                 onShalatClick = onNavigateToShalat,
+                onDoaClick = onNavigateToDoa,
                 onIslamAIClick = onNavigateToIslamAI
             )
         },
@@ -327,8 +329,8 @@ fun BottomNavigationBar(
     currentRoute: String,
     onHomeClick: () -> Unit = {},
     onShalatClick: () -> Unit = {},
-    onIslamAIClick: () -> Unit = {},
-    onLainnyaClick: () -> Unit = {}
+    onDoaClick: () -> Unit = {},
+    onIslamAIClick: () -> Unit = {}
 ) {
     NavigationBar(
         containerColor = DeepBlue,
@@ -362,10 +364,10 @@ fun BottomNavigationBar(
             )
         )
         NavigationBarItem(
-            selected = currentRoute == "islamAI",
-            onClick = onIslamAIClick,
-            icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null) },
-            label = { Text("IslamAI") },
+            selected = currentRoute == "doa",
+            onClick = onDoaClick,
+            icon = { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null) },
+            label = { Text("Doa") },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = AccentYellow,
                 selectedTextColor = AccentYellow,
@@ -375,10 +377,10 @@ fun BottomNavigationBar(
             )
         )
         NavigationBarItem(
-            selected = currentRoute == "lainnya",
-            onClick = onLainnyaClick,
-            icon = { Icon(Icons.Default.Apps, contentDescription = null) },
-            label = { Text("Lainnya") },
+            selected = currentRoute == "islamAI",
+            onClick = onIslamAIClick,
+            icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null) },
+            label = { Text("IslamAI") },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = AccentYellow,
                 selectedTextColor = AccentYellow,
