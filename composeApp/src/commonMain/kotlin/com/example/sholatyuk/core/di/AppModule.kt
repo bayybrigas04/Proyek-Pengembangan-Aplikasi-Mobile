@@ -6,7 +6,10 @@ import com.example.sholatyuk.data.local.SholatYukDatabase
 import com.example.sholatyuk.data.local.datastore.DataStoreFactory
 import com.example.sholatyuk.data.local.datastore.create
 import com.example.sholatyuk.data.remote.api.GeminiService
+import com.example.sholatyuk.data.repository.AIRepositoryImpl // <-- Import baru
+import com.example.sholatyuk.domain.repository.AIRepository // <-- Import baru
 import com.example.sholatyuk.presentation.screens.home.HomeViewModel
+import com.example.sholatyuk.presentation.screens.islamai.IslamAIViewModel // <-- Import baru
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
@@ -27,8 +30,14 @@ val sharedModules = module {
     // ── DataStore ─────────────────────────────────────────────────
     single { get<DataStoreFactory>().create() }
 
+    // ── Repositories ──────────────────────────────────────────────
+    // Mendaftarkan AIRepository agar bisa dipanggil oleh ViewModel
+    single<AIRepository> { AIRepositoryImpl(get(), get()) }
+
     // ── ViewModels ────────────────────────────────────────────────
     single { HomeViewModel() }
+    // Mendaftarkan IslamAIViewModel agar tidak force close saat layar dibuka
+    single { IslamAIViewModel(get()) }
 }
 
 fun initKoin(
