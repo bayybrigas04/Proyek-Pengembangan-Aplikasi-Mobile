@@ -8,7 +8,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sholatyuk.presentation.screens.home.HomeScreen
 import com.example.sholatyuk.presentation.screens.prayer.PrayerScreen
-import com.example.sholatyuk.presentation.screens.kajian.KajianScreen
+// 👇 Pastikan import DoaScreen yang baru dimasukkan
+import com.example.sholatyuk.presentation.screens.doa.DoaScreen
 import com.example.sholatyuk.presentation.screens.islamai.IslamAIScreen
 
 @Composable
@@ -48,7 +49,8 @@ fun AppNavHost(
             )
         }
         composable<Route.Doa> {
-            KajianScreen(
+            // 👇 Ini sudah kita ubah menjadi DoaScreen!
+            DoaScreen(
                 onNavigateToHome = {
                     navController.navigate(Route.Home) { popUpTo(Route.Home) { saveState = true }; launchSingleTop = true; restoreState = true }
                 },
