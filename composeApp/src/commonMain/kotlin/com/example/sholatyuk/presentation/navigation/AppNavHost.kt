@@ -8,8 +8,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sholatyuk.presentation.screens.home.HomeScreen
 import com.example.sholatyuk.presentation.screens.prayer.PrayerScreen
-import com.example.sholatyuk.presentation.screens.kajian.KajianScreen
+import com.example.sholatyuk.presentation.screens.doa.DoaScreen
 import com.example.sholatyuk.presentation.screens.islamai.IslamAIScreen
+// 👇 Tambahkan import ProfileScreen
+import com.example.sholatyuk.presentation.screens.profile.ProfileScreen
 
 @Composable
 fun AppNavHost(
@@ -31,6 +33,10 @@ fun AppNavHost(
                 },
                 onNavigateToIslamAI = {
                     navController.navigate(Route.IslamAI) { popUpTo(Route.Home) { saveState = true }; launchSingleTop = true; restoreState = true }
+                },
+                // 👇 Tambahkan aksi navigasi ke profil
+                onNavigateToProfile = {
+                    navController.navigate(Route.Profile) { launchSingleTop = true }
                 }
             )
         }
@@ -48,7 +54,7 @@ fun AppNavHost(
             )
         }
         composable<Route.Doa> {
-            KajianScreen(
+            DoaScreen(
                 onNavigateToHome = {
                     navController.navigate(Route.Home) { popUpTo(Route.Home) { saveState = true }; launchSingleTop = true; restoreState = true }
                 },
@@ -71,6 +77,13 @@ fun AppNavHost(
                 onNavigateToDoa = {
                     navController.navigate(Route.Doa) { popUpTo(Route.Home) { saveState = true }; launchSingleTop = true; restoreState = true }
                 }
+            )
+        }
+
+        // 👇 Tambahkan halaman Profile baru di sini
+        composable<Route.Profile> {
+            ProfileScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

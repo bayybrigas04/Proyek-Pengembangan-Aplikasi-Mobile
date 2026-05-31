@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sholatyuk.domain.model.PrayerTime
 import com.example.sholatyuk.presentation.theme.*
+// 👇 Import ProfileViewModel ditambahkan di sini
+import com.example.sholatyuk.presentation.screens.profile.ProfileViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -33,9 +35,13 @@ fun HomeScreen(
     onNavigateToShalat: () -> Unit = {},
     onNavigateToDoa: () -> Unit = {},
     onNavigateToIslamAI: () -> Unit = {},
-    viewModel: HomeViewModel = koinViewModel()
+    onNavigateToProfile: () -> Unit = {},
+    viewModel: HomeViewModel = koinViewModel(),
+    profileViewModel: ProfileViewModel = koinViewModel() // 👇 ProfileViewModel diinjeksi di sini
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    // 👇 Mengambil data nama pengguna dari ProfileViewModel
+    val userName by profileViewModel.userName.collectAsState()
 
     // Pop-up Dialog GPS
     if (uiState.showGpsDialog) {
@@ -92,9 +98,15 @@ fun HomeScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                item { HeaderSection() }
+                // 👇 Oper userName ke dalam HeaderSection
+                item {
+                    HeaderSection(
+                        userName = userName,
+                        onProfileClick = onNavigateToProfile
+                    )
+                }
 
-                // 👇 SMART BANNER: Ketuk untuk Refresh
+                // SMART BANNER: Ketuk untuk Refresh
                 if (uiState.isLoading) {
                     item {
                         Text(
@@ -113,7 +125,7 @@ fun HomeScreen(
                                 .fillMaxWidth()
                                 .padding(horizontal = 20.dp, vertical = 8.dp)
                                 .clip(RoundedCornerShape(16.dp))
-                                .clickable { viewModel.fetchPrayerTimes() }, // <-- Fungsi Refresh
+                                .clickable { viewModel.fetchPrayerTimes() },
                             colors = CardDefaults.cardColors(containerColor = Color.Red.copy(alpha = 0.1f)),
                             border = BorderStroke(1.dp, Color.Red.copy(alpha = 0.3f))
                         ) {
@@ -160,11 +172,16 @@ fun HomeScreen(
 }
 
 // ====================================================================
-// Komponen HeaderSection, PrayerClockCard, dll di bawah ini SAMA PERSIS
-// ====================================================================
 
 @Composable
-fun HeaderSection() {
+fun HeaderSection(userName: String = "Umar Faruq", onProfileClick: () -> Unit = {}) { // 👇 Parameter userName ditambahkan
+    // 👇 Logika untuk mengambil maksimal 2 huruf inisial dari nama
+    val initials = userName.split(" ")
+        .take(2)
+        .mapNotNull { it.firstOrNull()?.uppercase() }
+        .joinToString("")
+        .takeIf { it.isNotEmpty() } ?: "U"
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -199,11 +216,12 @@ fun HeaderSection() {
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(Color.Black),
+                    .background(Color.Black)
+                    .clickable { onProfileClick() },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "UF",
+                    text = initials, // 👇 Gunakan inisial dinamis di sini
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
@@ -445,7 +463,6 @@ fun BottomNavigationBar(
                 indicatorColor = Color.Transparent
             )
         )
-        // ... (Item navigasi lainnya dibiarkan seperti asli agar tidak kepanjangan)
         NavigationBarItem(
             selected = currentRoute == "shalat",
             onClick = onShalatClick,
