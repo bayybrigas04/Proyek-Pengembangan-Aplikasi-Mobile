@@ -14,8 +14,9 @@ import com.example.sholatyuk.domain.repository.PrayerRepository
 import com.example.sholatyuk.presentation.screens.home.HomeViewModel
 import com.example.sholatyuk.presentation.screens.islamai.IslamAIViewModel
 import com.example.sholatyuk.presentation.screens.prayer.PrayerViewModel
-// 👇 1. Tambahkan import DoaViewModel di sini
 import com.example.sholatyuk.presentation.screens.doa.DoaViewModel
+// 👇 1. Tambahkan import ProfileViewModel di sini
+import com.example.sholatyuk.presentation.screens.profile.ProfileViewModel
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
@@ -46,8 +47,9 @@ val sharedModules = module {
     factory { HomeViewModel(get(), get()) }
     factory { PrayerViewModel(get(), get()) }
     factory { IslamAIViewModel(get()) }
-    // 👇 2. Daftarkan DoaViewModel di sini!
     factory { DoaViewModel() }
+    // 👇 2. Daftarkan ProfileViewModel sebagai single (abadi) di sini!
+    single { ProfileViewModel() }
 }
 
 fun initKoin(
