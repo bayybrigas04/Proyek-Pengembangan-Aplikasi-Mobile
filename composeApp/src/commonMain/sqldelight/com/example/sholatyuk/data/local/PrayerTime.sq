@@ -14,35 +14,43 @@ CREATE TABLE PrayerTimeEntity (
     city_name   TEXT    NOT NULL DEFAULT ''
 );
 
--- Ambil jadwal sholat berdasarkan tanggal
+-- Tabel untuk CRUD Jadwal Sholat Manual
+CREATE TABLE ManualPrayerEntity (
+    id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    namaSholat      TEXT    NOT NULL,
+    waktu           TEXT    NOT NULL,
+    lokasi          TEXT    NOT NULL,
+    tanggalHijriah  TEXT    NOT NULL
+);
+
+-- Queries CRUD ManualPrayer
+getAllManualPrayers:
+SELECT * FROM ManualPrayerEntity ORDER BY waktu ASC;
+
+insertManualPrayer:
+INSERT INTO ManualPrayerEntity (namaSholat, waktu, lokasi, tanggalHijriah)
+VALUES (?, ?, ?, ?);
+
+updateManualPrayer:
+UPDATE ManualPrayerEntity
+SET namaSholat = ?, waktu = ?, lokasi = ?, tanggalHijriah = ?
+WHERE id = ?;
+
+deleteManualPrayer:
+DELETE FROM ManualPrayerEntity WHERE id = ?;
+
+-- Jadwal otomatis (API Cache)
 getPrayerTimeByDate:
-SELECT * FROM PrayerTimeEntity
-WHERE date = ?;
+SELECT * FROM PrayerTimeEntity WHERE date = ?;
 
--- Simpan jadwal sholat baru (Create)
 insertPrayerTime:
-INSERT OR REPLACE INTO PrayerTimeEntity (
-    date, fajr, sunrise, dhuhr, asr, maghrib,
-    isha, imsak, midnight, latitude, longitude, city_name
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO PrayerTimeEntity (date, fajr, sunrise, dhuhr, asr, maghrib, isha, imsak, midnight, latitude, longitude, city_name)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
--- Update jadwal sholat (Update)
 updatePrayerTime:
 UPDATE PrayerTimeEntity
 SET fajr = ?, sunrise = ?, dhuhr = ?, asr = ?, maghrib = ?, isha = ?, imsak = ?, midnight = ?, city_name = ?
 WHERE date = ?;
 
--- Hapus jadwal sholat berdasarkan tanggal (Delete)
 deletePrayerTimeByDate:
-DELETE FROM PrayerTimeEntity
-WHERE date = ?;
-
--- Hapus jadwal lama (lebih dari 30 hari)
-deleteOldPrayerTimes:
-DELETE FROM PrayerTimeEntity
-WHERE date < ?;
-
--- Cek apakah jadwal untuk tanggal tertentu sudah ada
-countByDate:
-SELECT COUNT(*) FROM PrayerTimeEntity
-WHERE date = ?;
+DELETE FROM PrayerTimeEntity WHERE date = ?;

@@ -5,7 +5,7 @@ data class LocationData(
     val longitude: Double
 )
 
-expect class LocationService {
+interface LocationService {
     suspend fun getCurrentLocation(): LocationData?
     fun hasLocationPermission(): Boolean
 }

@@ -14,7 +14,7 @@ class SholatYukApplication : Application() {
 
         val androidModule = module {
             single { DatabaseDriverFactory(androidContext()) }
-            single { LocationService() } // <-- Kurungnya dikosongkan
+            single { LocationService(androidContext()) }
         }
 
         initKoin(

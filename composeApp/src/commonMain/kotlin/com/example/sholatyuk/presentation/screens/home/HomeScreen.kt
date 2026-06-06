@@ -26,21 +26,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sholatyuk.domain.model.PrayerTime
 import com.example.sholatyuk.presentation.theme.*
-// 👇 Import ProfileViewModel ditambahkan di sini
 import com.example.sholatyuk.presentation.screens.profile.ProfileViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HomeScreen(
     onNavigateToShalat: () -> Unit = {},
-    onNavigateToDoa: () -> Unit = {},
     onNavigateToIslamAI: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToDoa: () -> Unit = {},
     viewModel: HomeViewModel = koinViewModel(),
-    profileViewModel: ProfileViewModel = koinViewModel() // 👇 ProfileViewModel diinjeksi di sini
+    profileViewModel: ProfileViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    // 👇 Mengambil data nama pengguna dari ProfileViewModel
     val userName by profileViewModel.userName.collectAsState()
 
     // Pop-up Dialog GPS
@@ -48,7 +46,7 @@ fun HomeScreen(
         AlertDialog(
             onDismissRequest = { viewModel.dismissGpsDialog() },
             title = { Text(text = "GPS Belum Aktif", fontWeight = FontWeight.Bold) },
-            text = { Text("Aplikasi SholatYuk membutuhkan lokasi (GPS) untuk menghitung jadwal sholat yang akurat di tempat Anda berdiri. Mohon aktifkan GPS sekarang.") },
+            text = { Text("Aplikasi SholatYuk membutuhkan lokasi (GPS) untuk menghitung jadwal sholat yang akurat. Mohon aktifkan GPS sekarang.") },
             confirmButton = {
                 Button(
                     onClick = {
@@ -77,8 +75,8 @@ fun HomeScreen(
                 currentRoute = "home",
                 onHomeClick = {},
                 onShalatClick = onNavigateToShalat,
-                onDoaClick = onNavigateToDoa,
-                onIslamAIClick = onNavigateToIslamAI
+                onIslamAIClick = onNavigateToIslamAI,
+                onDoaClick = onNavigateToDoa
             )
         },
         containerColor = DeepBlue
@@ -98,7 +96,6 @@ fun HomeScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                // 👇 Oper userName ke dalam HeaderSection
                 item {
                     HeaderSection(
                         userName = userName,
@@ -106,17 +103,11 @@ fun HomeScreen(
                     )
                 }
 
-                // SMART BANNER: Ketuk untuk Refresh
                 if (uiState.isLoading) {
                     item {
-                        Text(
-                            text = "Mencari lokasi dan jadwal sholat...",
-                            color = AccentYellow,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp),
-                            textAlign = TextAlign.Center
-                        )
+                        Box(Modifier.fillMaxWidth().padding(20.dp), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = AccentYellow)
+                        }
                     }
                 } else if (uiState.error != null) {
                     item {
@@ -124,7 +115,6 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 20.dp, vertical = 8.dp)
-                                .clip(RoundedCornerShape(16.dp))
                                 .clickable { viewModel.fetchPrayerTimes() },
                             colors = CardDefaults.cardColors(containerColor = Color.Red.copy(alpha = 0.1f)),
                             border = BorderStroke(1.dp, Color.Red.copy(alpha = 0.3f))
@@ -164,18 +154,15 @@ fun HomeScreen(
                 item { PrayerTimesRow(uiState.prayerTime) }
 
                 item { VideoBanner() }
-                item { MenuGrid() }
+                item { MenuGrid(onNavigateToDoa = onNavigateToDoa) }
                 item { Spacer(modifier = Modifier.height(32.dp)) }
             }
         }
     }
 }
 
-// ====================================================================
-
 @Composable
-fun HeaderSection(userName: String = "Umar Faruq", onProfileClick: () -> Unit = {}) { // 👇 Parameter userName ditambahkan
-    // 👇 Logika untuk mengambil maksimal 2 huruf inisial dari nama
+fun HeaderSection(userName: String = "Umar Faruq", onProfileClick: () -> Unit = {}) {
     val initials = userName.split(" ")
         .take(2)
         .mapNotNull { it.firstOrNull()?.uppercase() }
@@ -221,7 +208,7 @@ fun HeaderSection(userName: String = "Umar Faruq", onProfileClick: () -> Unit = 
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = initials, // 👇 Gunakan inisial dinamis di sini
+                    text = initials,
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
@@ -365,9 +352,9 @@ fun VideoBanner() {
 }
 
 @Composable
-fun MenuGrid() {
+fun MenuGrid(onNavigateToDoa: () -> Unit) {
     val items = listOf(
-        MenuItem("Dzikir & Doa", Icons.Default.BackHand),
+        MenuItem("Dzikir & Doa", Icons.Default.BackHand, onClick = onNavigateToDoa),
         MenuItem("Al-Quran", Icons.AutoMirrored.Filled.MenuBook),
         MenuItem("Sirah", Icons.Default.HistoryEdu),
         MenuItem("Rukun Islam", Icons.Default.NightsStay),
@@ -405,7 +392,7 @@ fun MenuIconItem(item: MenuItem, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .padding(4.dp)
-            .clickable { },
+            .clickable { item.onClick?.invoke() },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -435,7 +422,7 @@ fun MenuIconItem(item: MenuItem, modifier: Modifier = Modifier) {
     }
 }
 
-data class MenuItem(val title: String, val icon: ImageVector)
+data class MenuItem(val title: String, val icon: ImageVector, val onClick: (() -> Unit)? = null)
 
 @Composable
 fun BottomNavigationBar(
