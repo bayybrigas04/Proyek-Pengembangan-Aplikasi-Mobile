@@ -36,6 +36,7 @@ fun HomeScreen(
     onNavigateToIslamAI: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToKajianNotes: () -> Unit = {},
+    onNavigateToQibla: () -> Unit = {},
     viewModel: HomeViewModel = koinViewModel(),
     profileViewModel: ProfileViewModel = koinViewModel()
 ) {
@@ -164,6 +165,30 @@ fun HomeScreen(
                 item { 
                     KajianNotesEntryCard(onClick = onNavigateToKajianNotes) 
                 }
+
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        ActionCard(
+                            title = "Doa",
+                            subtitle = "Kumpulan Doa",
+                            icon = Icons.AutoMirrored.Filled.MenuBook,
+                            modifier = Modifier.weight(1f),
+                            onClick = onNavigateToDoa
+                        )
+                        ActionCard(
+                            title = "Kiblat",
+                            subtitle = "Arah Ka'bah",
+                            icon = Icons.Default.Explore,
+                            modifier = Modifier.weight(1f),
+                            onClick = onNavigateToQibla
+                        )
+                    }
+                }
                 
                 item { Spacer(modifier = Modifier.height(32.dp)) }
             }
@@ -221,6 +246,59 @@ fun KajianNotesEntryCard(onClick: () -> Unit) {
                 contentDescription = null,
                 tint = AccentYellow
             )
+        }
+    }
+}
+
+@Composable
+fun ActionCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier
+            .height(140.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = CardBackground),
+        border = BorderStroke(1.dp, AccentYellow.copy(alpha = 0.15f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(AccentYellow.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = AccentYellow,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Column {
+                Text(
+                    text = title,
+                    color = TextWhite,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = subtitle,
+                    color = TextWhite.copy(alpha = 0.6f),
+                    fontSize = 12.sp
+                )
+            }
         }
     }
 }

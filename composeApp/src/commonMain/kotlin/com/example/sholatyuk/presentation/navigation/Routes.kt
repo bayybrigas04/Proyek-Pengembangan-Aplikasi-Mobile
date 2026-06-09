@@ -20,4 +20,7 @@ sealed interface Route {
 
     @Serializable
     data object KajianNotes : Route
+
+    @Serializable
+    data object Qibla : Route
 }

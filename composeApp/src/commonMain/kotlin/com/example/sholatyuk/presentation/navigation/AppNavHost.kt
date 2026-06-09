@@ -12,6 +12,7 @@ import com.example.sholatyuk.presentation.screens.doa.DoaScreen
 import com.example.sholatyuk.presentation.screens.islamai.IslamAIScreen
 import com.example.sholatyuk.presentation.screens.profile.ProfileScreen
 import com.example.sholatyuk.presentation.screens.kajian.KajianScreen
+import com.example.sholatyuk.presentation.screens.prayer.QiblaScreen
 
 @Composable
 fun AppNavHost(
@@ -39,6 +40,9 @@ fun AppNavHost(
                 },
                 onNavigateToKajianNotes = {
                     navController.navigate(Route.KajianNotes)
+                },
+                onNavigateToQibla = {
+                    navController.navigate(Route.Qibla)
                 }
             )
         }
@@ -90,6 +94,12 @@ fun AppNavHost(
 
         composable<Route.KajianNotes> {
             KajianScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<Route.Qibla> {
+            QiblaScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
