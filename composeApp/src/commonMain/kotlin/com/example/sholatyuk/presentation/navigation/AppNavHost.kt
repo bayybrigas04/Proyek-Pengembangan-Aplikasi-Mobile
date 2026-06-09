@@ -10,8 +10,8 @@ import com.example.sholatyuk.presentation.screens.home.HomeScreen
 import com.example.sholatyuk.presentation.screens.prayer.PrayerScreen
 import com.example.sholatyuk.presentation.screens.doa.DoaScreen
 import com.example.sholatyuk.presentation.screens.islamai.IslamAIScreen
-// 👇 Tambahkan import ProfileScreen
 import com.example.sholatyuk.presentation.screens.profile.ProfileScreen
+import com.example.sholatyuk.presentation.screens.kajian.KajianScreen
 
 @Composable
 fun AppNavHost(
@@ -34,9 +34,11 @@ fun AppNavHost(
                 onNavigateToIslamAI = {
                     navController.navigate(Route.IslamAI) { popUpTo(Route.Home) { saveState = true }; launchSingleTop = true; restoreState = true }
                 },
-                // 👇 Tambahkan aksi navigasi ke profil
                 onNavigateToProfile = {
                     navController.navigate(Route.Profile) { launchSingleTop = true }
+                },
+                onNavigateToKajianNotes = {
+                    navController.navigate(Route.KajianNotes)
                 }
             )
         }
@@ -80,9 +82,14 @@ fun AppNavHost(
             )
         }
 
-        // 👇 Tambahkan halaman Profile baru di sini
         composable<Route.Profile> {
             ProfileScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<Route.KajianNotes> {
+            KajianScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

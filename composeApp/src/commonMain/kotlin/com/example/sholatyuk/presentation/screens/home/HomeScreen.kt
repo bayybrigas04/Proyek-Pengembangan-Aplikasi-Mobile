@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sholatyuk.domain.model.PrayerTime
 import com.example.sholatyuk.presentation.theme.*
-// 👇 Import ProfileViewModel ditambahkan di sini
 import com.example.sholatyuk.presentation.screens.profile.ProfileViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -36,14 +35,13 @@ fun HomeScreen(
     onNavigateToDoa: () -> Unit = {},
     onNavigateToIslamAI: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToKajianNotes: () -> Unit = {},
     viewModel: HomeViewModel = koinViewModel(),
-    profileViewModel: ProfileViewModel = koinViewModel() // 👇 ProfileViewModel diinjeksi di sini
+    profileViewModel: ProfileViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    // 👇 Mengambil data nama pengguna dari ProfileViewModel
     val userName by profileViewModel.userName.collectAsState()
 
-    // Pop-up Dialog GPS
     if (uiState.showGpsDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissGpsDialog() },
@@ -98,7 +96,6 @@ fun HomeScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                // 👇 Oper userName ke dalam HeaderSection
                 item {
                     HeaderSection(
                         userName = userName,
@@ -106,7 +103,6 @@ fun HomeScreen(
                     )
                 }
 
-                // SMART BANNER: Ketuk untuk Refresh
                 if (uiState.isLoading) {
                     item {
                         Text(
@@ -164,9 +160,67 @@ fun HomeScreen(
                 item { PrayerTimesRow(uiState.prayerTime) }
 
                 item { VideoBanner() }
-                item { MenuGrid() }
+                
+                item { 
+                    KajianNotesEntryCard(onClick = onNavigateToKajianNotes) 
+                }
+                
                 item { Spacer(modifier = Modifier.height(32.dp)) }
             }
+        }
+    }
+}
+
+@Composable
+fun KajianNotesEntryCard(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = CardBackground),
+        border = BorderStroke(1.dp, AccentYellow.copy(alpha = 0.2f))
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(24.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(AccentYellow.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.EditNote,
+                    contentDescription = null,
+                    tint = AccentYellow,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(20.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Catatan Kajian",
+                    color = TextWhite,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Kelola ringkasan ilmu di sini",
+                    color = TextWhite.copy(alpha = 0.7f),
+                    fontSize = 13.sp
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = AccentYellow
+            )
         }
     }
 }
@@ -174,8 +228,7 @@ fun HomeScreen(
 // ====================================================================
 
 @Composable
-fun HeaderSection(userName: String = "Umar Faruq", onProfileClick: () -> Unit = {}) { // 👇 Parameter userName ditambahkan
-    // 👇 Logika untuk mengambil maksimal 2 huruf inisial dari nama
+fun HeaderSection(userName: String = "Umar Faruq", onProfileClick: () -> Unit = {}) {
     val initials = userName.split(" ")
         .take(2)
         .mapNotNull { it.firstOrNull()?.uppercase() }
@@ -221,7 +274,7 @@ fun HeaderSection(userName: String = "Umar Faruq", onProfileClick: () -> Unit = 
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = initials, // 👇 Gunakan inisial dinamis di sini
+                    text = initials,
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
@@ -363,79 +416,6 @@ fun VideoBanner() {
         }
     }
 }
-
-@Composable
-fun MenuGrid() {
-    val items = listOf(
-        MenuItem("Dzikir & Doa", Icons.Default.BackHand),
-        MenuItem("Al-Quran", Icons.AutoMirrored.Filled.MenuBook),
-        MenuItem("Sirah", Icons.Default.HistoryEdu),
-        MenuItem("Rukun Islam", Icons.Default.NightsStay),
-        MenuItem("Rukun Iman", Icons.Default.AutoAwesome),
-        MenuItem("Asmaul Husna", Icons.Default.Star),
-        MenuItem("Penuntut Ilmu", Icons.Default.Lightbulb),
-        MenuItem("Fatwa Al-'Utsaimin", Icons.AutoMirrored.Filled.MenuBook),
-        MenuItem("Tanya Ustadz", Icons.Default.QuestionAnswer),
-        MenuItem("Umrah & Haji", Icons.Default.LocationCity),
-        MenuItem("UFA Official", Icons.Default.AccountCircle),
-        MenuItem("Maheer Travel", Icons.Default.AirplanemodeActive)
-    )
-
-    Column(modifier = Modifier.padding(horizontal = 12.dp)) {
-        for (i in items.indices step 4) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                for (j in 0 until 4) {
-                    if (i + j < items.size) {
-                        MenuIconItem(items[i + j], modifier = Modifier.weight(1f))
-                    } else {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-        }
-    }
-}
-
-@Composable
-fun MenuIconItem(item: MenuItem, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .padding(4.dp)
-            .clickable { },
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(CardBackground),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = item.icon,
-                contentDescription = null,
-                tint = AccentYellow,
-                modifier = Modifier.size(32.dp)
-            )
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = item.title,
-            color = TextWhite,
-            fontSize = 11.sp,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            lineHeight = 14.sp,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
-
-data class MenuItem(val title: String, val icon: ImageVector)
 
 @Composable
 fun BottomNavigationBar(

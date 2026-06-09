@@ -15,7 +15,9 @@ sealed interface Route {
     @Serializable
     data object IslamAI : Route
 
-    // Tambahan rute baru untuk halaman Profil
     @Serializable
     data object Profile : Route
+
+    @Serializable
+    data object KajianNotes : Route
 }
