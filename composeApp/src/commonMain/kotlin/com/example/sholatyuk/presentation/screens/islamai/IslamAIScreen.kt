@@ -23,6 +23,7 @@ import com.example.sholatyuk.domain.model.ChatMessage
 import com.example.sholatyuk.domain.model.MessageRole
 import com.example.sholatyuk.presentation.screens.home.BottomNavigationBar
 import com.example.sholatyuk.presentation.theme.*
+import com.example.sholatyuk.presentation.screens.profile.ProfileViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,10 +32,11 @@ fun IslamAIScreen(
     onNavigateToHome: () -> Unit = {},
     onNavigateToShalat: () -> Unit = {},
     onNavigateToDoa: () -> Unit = {},
-    viewModel: IslamAIViewModel = koinViewModel() // Menyuntikkan ViewModel menggunakan Koin
+    viewModel: IslamAIViewModel = koinViewModel(),
+    profileViewModel: ProfileViewModel = koinViewModel()
 ) {
-    // Memantau perubahan State dari ViewModel
     val uiState by viewModel.uiState.collectAsState()
+    val isLightModeEnabled by profileViewModel.isLightModeEnabled.collectAsState()
     var messageText by remember { mutableStateOf("") }
 
     Scaffold(
@@ -43,13 +45,13 @@ fun IslamAIScreen(
                 title = {
                     Text(
                         text = "IslamAI",
-                        color = TextWhite,
+                        color = if (isLightModeEnabled) Color.Black else TextWhite,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = DeepBlue
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
@@ -59,36 +61,33 @@ fun IslamAIScreen(
                 onHomeClick = onNavigateToHome,
                 onShalatClick = onNavigateToShalat,
                 onDoaClick = onNavigateToDoa,
-                onIslamAIClick = {}
+                onIslamAIClick = {},
+                isLightMode = isLightModeEnabled
             )
         },
-        containerColor = DeepBlue
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Area Daftar Obrolan
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 16.dp),
                 contentPadding = PaddingValues(vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                reverseLayout = false // Auto-scroll ke bawah bisa ditambahkan nanti jika perlu
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Menampilkan daftar pesan dari database/state
                 items(uiState.messages) { msg ->
-                    ChatBubble(message = msg)
+                    ChatBubble(message = msg, isLightMode = isLightModeEnabled)
                 }
 
-                // Indikator Loading saat AI sedang merespons
                 if (uiState.isLoading) {
                     item {
                         Text(
                             text = "IslamAI sedang mengetik...",
-                            color = TextWhite.copy(alpha = 0.5f),
+                            color = (if (isLightModeEnabled) Color.Black else TextWhite).copy(alpha = 0.5f),
                             fontSize = 12.sp,
                             modifier = Modifier.padding(start = 16.dp)
                         )
@@ -96,25 +95,24 @@ fun IslamAIScreen(
                 }
             }
 
-            // Area Input Teks & Tombol Kirim
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(DeepBlue)
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
                     value = messageText,
                     onValueChange = { messageText = it },
-                    placeholder = { Text("Tanya seputar Islam...", color = TextWhite.copy(alpha = 0.5f)) },
+                    placeholder = { Text("Tanya seputar Islam...", color = Color.Gray) },
                     modifier = Modifier.weight(1f),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = LightTeal,
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
-                        focusedTextColor = TextWhite,
-                        unfocusedTextColor = TextWhite,
-                        cursorColor = AccentYellow
+                        focusedBorderColor = if (isLightModeEnabled) DeepBlue else LightTeal,
+                        unfocusedBorderColor = (if (isLightModeEnabled) Color.Black else Color.White).copy(alpha = 0.2f),
+                        focusedTextColor = if (isLightModeEnabled) Color.Black else TextWhite,
+                        unfocusedTextColor = if (isLightModeEnabled) Color.Black else TextWhite,
+                        cursorColor = if (isLightModeEnabled) DeepBlue else AccentYellow
                     ),
                     shape = RoundedCornerShape(24.dp),
                     maxLines = 3
@@ -125,19 +123,19 @@ fun IslamAIScreen(
                 IconButton(
                     onClick = {
                         if (messageText.isNotBlank() && !uiState.isLoading) {
-                            viewModel.sendMessage(messageText) // Mengirim pesan ke server
-                            messageText = "" // Mengosongkan kolom teks setelah dikirim
+                            viewModel.sendMessage(messageText)
+                            messageText = ""
                         }
                     },
                     modifier = Modifier
                         .size(48.dp)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(LightTeal)
+                        .background(if (isLightModeEnabled) DeepBlue else LightTeal)
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = "Kirim",
-                        tint = TextWhite,
+                        tint = Color.White,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -146,11 +144,14 @@ fun IslamAIScreen(
     }
 }
 
-// Komponen balon pesan yang menyesuaikan pengirimnya (User / AI)
 @Composable
-fun ChatBubble(message: ChatMessage) {
+fun ChatBubble(message: ChatMessage, isLightMode: Boolean) {
     val isAi = message.role == MessageRole.ASSISTANT
-    val backgroundColor = if (isAi) Color.White.copy(alpha = 0.1f) else LightTeal
+    val backgroundColor = if (isAi) {
+        (if (isLightMode) Color.Black else Color.White).copy(alpha = 0.1f)
+    } else {
+        if (isLightMode) DeepBlue else LightTeal
+    }
     val alignment = if (isAi) Alignment.CenterStart else Alignment.CenterEnd
     val shape = if (isAi) {
         RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp)
@@ -158,15 +159,12 @@ fun ChatBubble(message: ChatMessage) {
         RoundedCornerShape(16.dp, 16.dp, 4.dp, 16.dp)
     }
 
-    // Logika untuk mengubah **teks** menjadi teks tebal (bold)
     val formattedText = buildAnnotatedString {
         val parts = message.content.split("**")
         for ((index, part) in parts.withIndex()) {
             if (index % 2 == 0) {
-                // Teks biasa (tidak diapit bintang)
                 append(part)
             } else {
-                // Teks yang diapit bintang, berikan gaya Bold
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append(part)
                 }
@@ -188,7 +186,13 @@ fun ChatBubble(message: ChatMessage) {
         ) {
             Text(
                 text = formattedText,
-                color = if (message.isError) Color.Red.copy(alpha = 0.8f) else TextWhite,
+                color = if (message.isError) {
+                    Color.Red.copy(alpha = 0.8f)
+                } else if (!isAi) {
+                    Color.White
+                } else {
+                    if (isLightMode) Color.Black else TextWhite
+                },
                 fontSize = 15.sp,
                 lineHeight = 22.sp
             )
