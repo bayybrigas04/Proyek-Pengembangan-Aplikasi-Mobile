@@ -50,29 +50,6 @@ fun KajianScreen(
     var noteToDelete by remember { mutableStateOf<KajianNote?>(null) }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { 
-                    Text(
-                        "Catatan Kajian Islam", 
-                        color = if (isLightModeEnabled) Color.Black else TextWhite, 
-                        fontWeight = FontWeight.Bold
-                    ) 
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            Icons.Default.ArrowBack, 
-                            contentDescription = "Kembali", 
-                            tint = if (isLightModeEnabled) DeepBlue else AccentYellow
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = if (isLightModeEnabled) Color(0xFFF5F5F5) else DeepBlue
-                )
-            )
-        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
@@ -83,25 +60,69 @@ fun KajianScreen(
                 Icon(Icons.Default.Add, contentDescription = "Tambah Catatan")
             }
         },
-        containerColor = if (isLightModeEnabled) Color(0xFFF5F5F5) else DeepBlue
+        containerColor = Color.Transparent
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .background(
                     brush = if (isLightModeEnabled) {
                         Brush.verticalGradient(
-                            colors = listOf(Color(0xFFE0F2F1), Color(0xFFF5F5F5))
+                            colors = listOf(Color(0xFFE0F2F1), Color(0xFFF5F5F5)),
+                            startY = 0f,
+                            endY = 1200f
                         )
                     } else {
                         Brush.verticalGradient(
-                            colors = listOf(DarkTeal, DeepBlue)
+                            colors = listOf(DarkTeal, DeepBlue),
+                            startY = 0f,
+                            endY = 1200f
                         )
                     }
                 )
+                .padding(paddingValues)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
+                // Header (Consistent with Home, Prayer, Doa, and IslamAI screens)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp, start = 20.dp, end = 20.dp, bottom = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onNavigateBack,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background((if (isLightModeEnabled) DeepBlue else AccentYellow).copy(alpha = 0.1f))
+                    ) {
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = if (isLightModeEnabled) DeepBlue else AccentYellow
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.width(16.dp))
+                    
+                    Column {
+                        Text(
+                            text = "CATATAN",
+                            color = (if (isLightModeEnabled) Color.Black else TextWhite).copy(alpha = 0.8f),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 0.5.sp
+                        )
+                        Text(
+                            text = "Kajian Islam",
+                            color = if (isLightModeEnabled) Color.Black else TextWhite,
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
                 // Search Bar
                 SearchBar(
                     query = uiState.searchQuery,
@@ -128,7 +149,7 @@ fun KajianScreen(
                 } else {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
-                        contentPadding = PaddingValues(16.dp),
+                        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxSize()
@@ -206,7 +227,7 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit, isLightMode: Boole
         onValueChange = onQueryChange,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(horizontal = 20.dp, vertical = 8.dp)
             .clip(RoundedCornerShape(12.dp)),
         placeholder = { Text("Cari judul atau ustadz...", color = Color.Gray) },
         leadingIcon = { 
@@ -236,8 +257,8 @@ fun CategoryStatsRow(
     isLightMode: Boolean
 ) {
     LazyRow(
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 16.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
