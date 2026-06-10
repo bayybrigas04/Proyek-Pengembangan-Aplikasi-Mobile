@@ -168,7 +168,13 @@ fun HomeScreen(
                     }
                 }
 
-                item { PrayerClockCard(uiState.prayerTime, isLightModeEnabled) }
+                item { 
+                    PrayerClockCard(
+                        prayerTime = uiState.prayerTime, 
+                        isLightMode = isLightModeEnabled,
+                        onClick = onNavigateToShalat
+                    ) 
+                }
                 item { PrayerTimesRow(uiState.prayerTime, isLightModeEnabled) }
 
                 item {
@@ -381,11 +387,16 @@ fun HeaderSection(userName: String = "Umar Faruq", onProfileClick: () -> Unit = 
 }
 
 @Composable
-fun PrayerClockCard(prayerTime: PrayerTime?, isLightMode: Boolean) {
+fun PrayerClockCard(
+    prayerTime: PrayerTime?, 
+    isLightMode: Boolean,
+    onClick: () -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp),
+            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(
             containerColor = (if (isLightMode) Color.Black else Color.White).copy(alpha = 0.08f)
