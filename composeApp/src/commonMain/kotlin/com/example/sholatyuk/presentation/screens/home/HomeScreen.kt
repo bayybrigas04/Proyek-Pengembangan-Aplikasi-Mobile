@@ -27,6 +27,9 @@ import androidx.compose.ui.unit.sp
 import com.example.sholatyuk.domain.model.PrayerTime
 import com.example.sholatyuk.presentation.theme.*
 import com.example.sholatyuk.presentation.screens.profile.ProfileViewModel
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -394,6 +397,8 @@ fun PrayerClockCard(
     isLightMode: Boolean,
     onClick: () -> Unit = {}
 ) {
+    val nextPrayerReminder = getNextPrayerReminder(prayerTime)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -435,6 +440,17 @@ fun PrayerClockCard(
                 fontWeight = FontWeight.Bold,
                 letterSpacing = (-1).sp
             )
+            
+            if (nextPrayerReminder != null) {
+                Text(
+                    text = nextPrayerReminder,
+                    color = (if (isLightMode) Color.Black else TextWhite).copy(alpha = 0.6f),
+                    fontSize = 11.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -462,16 +478,35 @@ fun PrayerTimesRow(prayerTime: PrayerTime?, isLightMode: Boolean) {
             .padding(horizontal = 20.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        PrayerTimeItem("Subuh", prayerTime?.fajr ?: "--:--", Icons.Default.WbSunny, isLightMode = isLightMode)
-        PrayerTimeItem("Dzuhur", prayerTime?.dhuhr ?: "--:--", Icons.Default.WbSunny, isLightMode = isLightMode)
-        PrayerTimeItem("Ashar", prayerTime?.asr ?: "--:--", Icons.Default.Cloud, isLightMode = isLightMode)
-        PrayerTimeItem("Maghrib", prayerTime?.maghrib ?: "--:--", Icons.Default.Waves, isLightMode = isLightMode)
-        PrayerTimeItem("Isya", prayerTime?.isha ?: "--:--", Icons.Default.NightsStay, isLightMode = isLightMode)
+        val prayers = listOf(
+            Triple("Subuh", prayerTime?.fajr ?: "--:--", Icons.Default.WbSunny),
+            Triple("Dzuhur", prayerTime?.dhuhr ?: "--:--", Icons.Default.WbSunny),
+            Triple("Ashar", prayerTime?.asr ?: "--:--", Icons.Default.Cloud),
+            Triple("Maghrib", prayerTime?.maghrib ?: "--:--", Icons.Default.Waves),
+            Triple("Isya", prayerTime?.isha ?: "--:--", Icons.Default.NightsStay)
+        )
+
+        prayers.forEach { (label, time, icon) ->
+            PrayerTimeItem(
+                label = label,
+                time = time,
+                icon = icon,
+                remaining = if (time != "--:--") calculateRemainingFor(time, label) else null,
+                isLightMode = isLightMode
+            )
+        }
     }
 }
 
 @Composable
-fun PrayerTimeItem(label: String, time: String, icon: ImageVector, isNext: Boolean = false, isLightMode: Boolean) {
+fun PrayerTimeItem(
+    label: String, 
+    time: String, 
+    icon: ImageVector, 
+    isNext: Boolean = false, 
+    remaining: String? = null,
+    isLightMode: Boolean
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(
             imageVector = icon,
@@ -492,6 +527,16 @@ fun PrayerTimeItem(label: String, time: String, icon: ImageVector, isNext: Boole
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
         )
+        if (remaining != null) {
+            Text(
+                text = remaining,
+                color = (if (isLightMode) DeepBlue else AccentYellow).copy(alpha = 0.5f),
+                fontSize = 8.sp,
+                textAlign = TextAlign.Center,
+                lineHeight = 9.sp,
+                modifier = Modifier.padding(top = 2.dp).widthIn(max = 60.dp)
+            )
+        }
     }
 }
 
@@ -558,5 +603,67 @@ fun BottomNavigationBar(
                 indicatorColor = Color.Transparent
             )
         )
+    }
+}
+
+private fun getNextPrayerReminder(prayerTime: PrayerTime?): String? {
+    if (prayerTime == null) return null
+    val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    val currentMinutes = now.hour * 60 + now.minute
+    
+    val prayers = listOf(
+        "Subuh" to prayerTime.fajr,
+        "Dzuhur" to prayerTime.dhuhr,
+        "Ashar" to prayerTime.asr,
+        "Maghrib" to prayerTime.maghrib,
+        "Isya" to prayerTime.isha
+    )
+    
+    val next = prayers.find {
+        val parts = it.second.split(":")
+        if (parts.size < 2) false
+        else (parts[0].trim().toInt() * 60 + parts[1].trim().toInt()) > currentMinutes
+    } ?: prayers.first()
+    
+    val parts = next.second.split(":")
+    val pMinutes = parts[0].trim().toInt() * 60 + parts[1].trim().toInt()
+    
+    var diff = pMinutes - currentMinutes
+    if (diff < 0) diff += 24 * 60
+    
+    if (diff == 0) return "Waktunya ${next.first}"
+    
+    val h = diff / 60
+    val m = diff % 60
+    
+    return buildString {
+        if (h > 0) append("$h jam ")
+        if (m > 0) append("$m menit ")
+        append("lagi menuju waktu ${next.first.lowercase()}")
+    }
+}
+
+private fun calculateRemainingFor(timeStr: String, label: String): String? {
+    try {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        val currentMinutes = now.hour * 60 + now.minute
+        val parts = timeStr.split(":")
+        val pMinutes = parts[0].trim().toInt() * 60 + parts[1].trim().toInt()
+        
+        var diff = pMinutes - currentMinutes
+        if (diff < 0) diff += 24 * 60
+        
+        if (diff == 0) return "Waktunya"
+        
+        val h = diff / 60
+        val m = diff % 60
+        
+        return buildString {
+            if (h > 0) append("${h}j ")
+            if (m > 0) append("${m}m ")
+            append("lagi")
+        }
+    } catch (e: Exception) {
+        return null
     }
 }
