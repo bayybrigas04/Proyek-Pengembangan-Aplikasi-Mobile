@@ -32,9 +32,9 @@ class HomeViewModel(
         viewModelScope.launch {
             while (isActive) {
                 val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-                val timeString = "${now.hour.toString().padStart(2, '0')}:${now.minute.toString().padStart(2, '0')}"
+                val timeString = "${now.hour.toString().padStart(2, '0')}:${now.minute.toString().padStart(2, '0')}:${now.second.toString().padStart(2, '0')}"
                 _uiState.update { it.copy(currentTime = timeString) }
-                delay(1000) // Update every second for better responsiveness, though minute is enough
+                delay(1000)
             }
         }
     }

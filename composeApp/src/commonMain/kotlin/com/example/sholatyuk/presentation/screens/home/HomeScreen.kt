@@ -431,9 +431,9 @@ fun PrayerClockCard(
             Text(
                 text = currentTime,
                 color = if (isLightMode) Color.Black else TextWhite,
-                fontSize = 80.sp,
+                fontSize = 64.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = (-2).sp
+                letterSpacing = (-1).sp
             )
             Spacer(modifier = Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
