@@ -35,20 +35,6 @@ fun PrayerScreen(
     val isLightModeEnabled by profileViewModel.isLightModeEnabled.collectAsState()
 
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { 
-                    Text(
-                        "Jadwal Shalat", 
-                        color = if (isLightModeEnabled) Color.Black else TextWhite, 
-                        fontWeight = FontWeight.Bold
-                    ) 
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
-            )
-        },
         bottomBar = {
             BottomNavigationBar(
                 currentRoute = "shalat",
@@ -59,12 +45,11 @@ fun PrayerScreen(
                 isLightMode = isLightModeEnabled
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color.Transparent // Background handle by Box with Gradient
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .background(
                     brush = if (isLightModeEnabled) {
                         Brush.verticalGradient(
@@ -80,14 +65,36 @@ fun PrayerScreen(
                         )
                     }
                 )
+                .padding(paddingValues)
         ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(vertical = 16.dp)
+                contentPadding = PaddingValues(bottom = 24.dp)
             ) {
+                // Header (Consistently styled with Home, Doa, and IslamAI)
+                item {
+                    Column(
+                        modifier = Modifier.padding(top = 24.dp, bottom = 16.dp)
+                    ) {
+                        Text(
+                            text = "JADWAL",
+                            color = (if (isLightModeEnabled) Color.Black else TextWhite).copy(alpha = 0.8f),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 0.5.sp
+                        )
+                        Text(
+                            text = "Shalat",
+                            color = if (isLightModeEnabled) Color.Black else TextWhite,
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
                 // Tampilan Loading atau Error
                 if (uiState.isLoading) {
                     item {
@@ -112,20 +119,31 @@ fun PrayerScreen(
                 // Tampilan Jadwal Sholat
                 uiState.prayerTime?.let { time ->
                     item {
-                        Column(modifier = Modifier.padding(bottom = 8.dp)) {
-                            Text(
-                                text = "Lokasi: ${time.cityName}",
-                                color = if (isLightModeEnabled) Color.Black else TextWhite,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "Tanggal: ${time.date}",
-                                color = (if (isLightModeEnabled) Color.Black else TextWhite).copy(alpha = 0.7f),
-                                fontSize = 14.sp
-                            )
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = (if (isLightModeEnabled) Color.Black else Color.White).copy(alpha = 0.05f)
+                            ),
+                            border = BorderStroke(1.dp, (if (isLightModeEnabled) Color.Black else Color.White).copy(alpha = 0.1f))
+                        ) {
+                            Column(modifier = Modifier.padding(20.dp)) {
+                                Text(
+                                    text = "Lokasi: ${time.cityName}",
+                                    color = if (isLightModeEnabled) Color.Black else TextWhite,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Tanggal: ${time.date}",
+                                    color = (if (isLightModeEnabled) Color.Black else TextWhite).copy(alpha = 0.7f),
+                                    fontSize = 14.sp
+                                )
+                            }
                         }
                     }
+
+                    item { Spacer(modifier = Modifier.height(4.dp)) }
 
                     item { PrayerTimeRow("Imsak", time.imsak, isLightModeEnabled) }
                     item { PrayerTimeRow("Subuh", time.fajr, isLightModeEnabled) }
@@ -145,16 +163,17 @@ fun PrayerScreen(
 fun PrayerTimeRow(name: String, time: String, isLightMode: Boolean) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = (if (isLightMode) Color.Black else Color.White).copy(alpha = 0.08f)
+            containerColor = if (isLightMode) Color.White else CardBackground
         ),
-        border = BorderStroke(1.dp, (if (isLightMode) Color.Black else Color.White).copy(alpha = 0.1f))
+        border = BorderStroke(1.dp, (if (isLightMode) DeepBlue else AccentYellow).copy(alpha = 0.1f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isLightMode) 2.dp else 0.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 18.dp),
+                .padding(horizontal = 24.dp, vertical = 20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -162,12 +181,12 @@ fun PrayerTimeRow(name: String, time: String, isLightMode: Boolean) {
                 text = name,
                 color = if (isLightMode) Color.Black else TextWhite,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Bold
             )
             Text(
                 text = time,
                 color = if (isLightMode) DeepBlue else AccentYellow,
-                fontSize = 18.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
         }
