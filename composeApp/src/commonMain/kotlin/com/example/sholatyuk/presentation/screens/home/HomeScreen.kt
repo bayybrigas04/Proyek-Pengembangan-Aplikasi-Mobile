@@ -161,9 +161,9 @@ fun HomeScreen(
                 item { PrayerTimesRow(uiState.prayerTime) }
 
                 item { VideoBanner() }
-                
-                item { 
-                    KajianNotesEntryCard(onClick = onNavigateToKajianNotes) 
+
+                item {
+                    KajianNotesEntryCard(onClick = onNavigateToKajianNotes)
                 }
 
                 item {
