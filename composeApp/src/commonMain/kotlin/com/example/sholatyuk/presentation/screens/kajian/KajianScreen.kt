@@ -8,7 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
@@ -24,13 +23,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.example.sholatyuk.domain.model.KajianCategory
 import com.example.sholatyuk.domain.model.KajianNote
 import com.example.sholatyuk.presentation.theme.*
 import com.example.sholatyuk.presentation.screens.profile.ProfileViewModel
+import kotlinx.datetime.*
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -394,6 +396,20 @@ fun AddEditNoteDialog(
     var kategori by remember { mutableStateOf(note?.kategori ?: KajianCategory.AQIDAH) }
     var isi by remember { mutableStateOf(note?.isi ?: "") }
     var expanded by remember { mutableStateOf(false) }
+    
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    if (showDatePicker) {
+        KajianDatePickerDialog(
+            initialDate = tanggal,
+            onDismiss = { showDatePicker = false },
+            onDateSelected = { 
+                tanggal = it
+                showDatePicker = false
+            },
+            isLightMode = isLightMode
+        )
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -432,7 +448,30 @@ fun AddEditNoteDialog(
             ) {
                 NoteTextField(value = judul, onValueChange = { judul = it }, label = "Judul Kajian", isLightMode = isLightMode)
                 NoteTextField(value = ustadz, onValueChange = { ustadz = it }, label = "Ustadz/Pemateri", isLightMode = isLightMode)
-                NoteTextField(value = tanggal, onValueChange = { tanggal = it }, label = "Tanggal (DD/MM/YYYY)", isLightMode = isLightMode)
+                
+                // Date Picker Field (Interactive)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showDatePicker = true }
+                ) {
+                    NoteTextField(
+                        value = tanggal,
+                        onValueChange = { },
+                        label = "Tanggal (DD/MM/YYYY)",
+                        isLightMode = isLightMode,
+                        readOnly = true,
+                        trailingIcon = {
+                            Icon(
+                                Icons.Default.CalendarMonth,
+                                contentDescription = null,
+                                tint = if (isLightMode) DeepBlue else AccentYellow
+                            )
+                        }
+                    )
+                    // Cover the field to ensure click works everywhere
+                    Box(modifier = Modifier.matchParentSize().clickable { showDatePicker = true })
+                }
                 
                 // Category Dropdown
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -494,7 +533,10 @@ fun NoteTextField(
     label: String,
     singleLine: Boolean = true,
     minLines: Int = 1,
-    isLightMode: Boolean
+    isLightMode: Boolean,
+    readOnly: Boolean = false,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    modifier: Modifier = Modifier
 ) {
     OutlinedTextField(
         value = value,
@@ -505,16 +547,216 @@ fun NoteTextField(
                 color = (if (isLightMode) DeepBlue else AccentYellow).copy(alpha = 0.6f)
             ) 
         },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = if (isLightMode) Color.Black else TextWhite,
             unfocusedTextColor = if (isLightMode) Color.Black else TextWhite,
             focusedBorderColor = if (isLightMode) DeepBlue else AccentYellow,
             unfocusedBorderColor = (if (isLightMode) DeepBlue else AccentYellow).copy(alpha = 0.3f),
-            cursorColor = if (isLightMode) DeepBlue else AccentYellow
+            cursorColor = if (isLightMode) DeepBlue else AccentYellow,
+            disabledTextColor = if (isLightMode) Color.Black else TextWhite,
+            disabledBorderColor = (if (isLightMode) DeepBlue else AccentYellow).copy(alpha = 0.3f),
+            disabledLabelColor = (if (isLightMode) DeepBlue else AccentYellow).copy(alpha = 0.6f),
+            disabledTrailingIconColor = if (isLightMode) DeepBlue else AccentYellow
         ),
         singleLine = singleLine,
         minLines = minLines,
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(8.dp),
+        readOnly = readOnly,
+        trailingIcon = trailingIcon,
+        enabled = !readOnly
     )
+}
+
+@Composable
+fun KajianDatePickerDialog(
+    initialDate: String,
+    onDismiss: () -> Unit,
+    onDateSelected: (String) -> Unit,
+    isLightMode: Boolean
+) {
+    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    
+    val parsedDate = remember(initialDate) {
+        try {
+            if (initialDate.isNotBlank()) {
+                val parts = initialDate.split("/")
+                LocalDate(parts[2].toInt(), parts[1].toInt(), parts[0].toInt())
+            } else today
+        } catch (e: Exception) {
+            today
+        }
+    }
+
+    var currentMonth by remember { mutableStateOf(parsedDate.month) }
+    var currentYear by remember { mutableStateOf(parsedDate.year) }
+    
+    val monthsId = listOf(
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    )
+    val daysId = listOf("Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab")
+    
+    val bgColor = if (isLightMode) Color.White else Color(0xFF1E2A2A)
+    val accentColor = if (isLightMode) DeepBlue else Color(0xFFC9A84C)
+    val textColor = if (isLightMode) Color.Black else TextWhite
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = bgColor,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Header: Bulan Tahun
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = {
+                        if (currentMonth == Month.JANUARY) {
+                            currentMonth = Month.DECEMBER
+                            currentYear -= 1
+                        } else {
+                            currentMonth = Month.entries[currentMonth.ordinal - 1]
+                        }
+                    }) {
+                        Icon(Icons.Default.ChevronLeft, contentDescription = null, tint = accentColor)
+                    }
+                    
+                    Text(
+                        text = "${monthsId[currentMonth.ordinal]} $currentYear",
+                        color = textColor,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    
+                    IconButton(onClick = {
+                        if (currentMonth == Month.DECEMBER) {
+                            currentMonth = Month.JANUARY
+                            currentYear += 1
+                        } else {
+                            currentMonth = Month.entries[currentMonth.ordinal + 1]
+                        }
+                    }) {
+                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = accentColor)
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Day Names
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    daysId.forEach { day ->
+                        Text(
+                            text = day,
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Center,
+                            color = textColor.copy(alpha = 0.5f),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Calendar Grid
+                val firstDayOfMonth = LocalDate(currentYear, currentMonth, 1)
+                val daysInMonth = when (currentMonth) {
+                    Month.FEBRUARY -> if ((currentYear % 4 == 0 && currentYear % 100 != 0) || (currentYear % 400 == 0)) 29 else 28
+                    Month.APRIL, Month.JUNE, Month.SEPTEMBER, Month.NOVEMBER -> 30
+                    else -> 31
+                }
+                val firstDayOfWeek = if (firstDayOfMonth.dayOfWeek == DayOfWeek.SUNDAY) 0 else firstDayOfMonth.dayOfWeek.isoDayNumber
+                
+                val calendarDays = mutableListOf<LocalDate?>()
+                for (i in 0 until firstDayOfWeek) {
+                    calendarDays.add(null)
+                }
+                for (i in 1..daysInMonth) {
+                    calendarDays.add(LocalDate(currentYear, currentMonth, i))
+                }
+                
+                val weeks = calendarDays.chunked(7)
+                weeks.forEach { week ->
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        week.forEach { date ->
+                            val isSelected = date != null && date == parsedDate
+                            val isToday = date != null && date == today
+                            
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .aspectRatio(1f)
+                                    .padding(2.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        when {
+                                            isSelected -> accentColor
+                                            isToday -> accentColor.copy(alpha = 0.2f)
+                                            else -> Color.Transparent
+                                        }
+                                    )
+                                    .border(
+                                        if (isToday && !isSelected) BorderStroke(1.dp, accentColor) else BorderStroke(0.dp, Color.Transparent),
+                                        CircleShape
+                                    )
+                                    .clickable(enabled = date != null) {
+                                        date?.let {
+                                            onDateSelected("${it.dayOfMonth.toString().padStart(2, '0')}/${it.monthNumber.toString().padStart(2, '0')}/${it.year}")
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (date != null) {
+                                    Text(
+                                        text = date.dayOfMonth.toString(),
+                                        color = when {
+                                            isSelected -> if (isLightMode) Color.White else DeepBlue
+                                            isToday -> accentColor
+                                            else -> textColor
+                                        },
+                                        fontSize = 14.sp,
+                                        fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                }
+                            }
+                        }
+                        // Fill empty cells at the end of the last week
+                        if (week.size < 7) {
+                            for (i in 0 until (7 - week.size)) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Footer Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(onClick = {
+                        onDateSelected("${today.dayOfMonth.toString().padStart(2, '0')}/${today.monthNumber.toString().padStart(2, '0')}/${today.year}")
+                    }) {
+                        Text("Hari Ini", color = accentColor, fontWeight = FontWeight.Bold)
+                    }
+                    
+                    TextButton(onClick = onDismiss) {
+                        Text("Batal", color = textColor.copy(alpha = 0.6f))
+                    }
+                }
+            }
+        }
+    }
 }
