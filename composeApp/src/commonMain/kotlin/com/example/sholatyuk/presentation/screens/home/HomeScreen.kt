@@ -170,6 +170,7 @@ fun HomeScreen(
 
                 item { 
                     PrayerClockCard(
+                        currentTime = uiState.currentTime,
                         prayerTime = uiState.prayerTime, 
                         isLightMode = isLightModeEnabled,
                         onClick = onNavigateToShalat
@@ -388,6 +389,7 @@ fun HeaderSection(userName: String = "Umar Faruq", onProfileClick: () -> Unit = 
 
 @Composable
 fun PrayerClockCard(
+    currentTime: String,
     prayerTime: PrayerTime?, 
     isLightMode: Boolean,
     onClick: () -> Unit = {}
@@ -427,7 +429,7 @@ fun PrayerClockCard(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = prayerTime?.dhuhr ?: "--:--",
+                text = currentTime,
                 color = if (isLightMode) Color.Black else TextWhite,
                 fontSize = 80.sp,
                 fontWeight = FontWeight.Bold,
@@ -443,7 +445,7 @@ fun PrayerClockCard(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "Waktu Dzuhur Hari Ini",
+                    text = "Waktu Lokal Saat Ini",
                     color = (if (isLightMode) Color.Black else TextWhite).copy(alpha = 0.9f),
                     fontSize = 13.sp
                 )
