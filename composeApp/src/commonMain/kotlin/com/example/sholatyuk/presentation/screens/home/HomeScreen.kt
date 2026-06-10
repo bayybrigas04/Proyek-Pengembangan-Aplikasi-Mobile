@@ -160,8 +160,6 @@ fun HomeScreen(
                 item { PrayerClockCard(uiState.prayerTime) }
                 item { PrayerTimesRow(uiState.prayerTime) }
 
-                item { VideoBanner() }
-
                 item {
                     KajianNotesEntryCard(onClick = onNavigateToKajianNotes)
                 }
@@ -451,47 +449,6 @@ fun PrayerTimeItem(label: String, time: String, icon: ImageVector, isNext: Boole
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
         )
-    }
-}
-
-@Composable
-fun VideoBanner() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Black)
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.PlayCircle,
-                    contentDescription = null,
-                    tint = TextWhite,
-                    modifier = Modifier.size(28.dp)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = "Video UFA",
-                    color = TextWhite,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 20.sp
-                )
-            }
-            Icon(
-                imageVector = Icons.Default.PlayArrow,
-                contentDescription = null,
-                tint = TextWhite,
-                modifier = Modifier.size(24.dp)
-            )
-        }
     }
 }
 
