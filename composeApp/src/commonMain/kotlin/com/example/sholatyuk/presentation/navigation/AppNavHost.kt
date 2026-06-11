@@ -13,6 +13,7 @@ import com.example.sholatyuk.presentation.screens.islamai.IslamAIScreen
 import com.example.sholatyuk.presentation.screens.profile.ProfileScreen
 import com.example.sholatyuk.presentation.screens.kajian.KajianScreen
 import com.example.sholatyuk.presentation.screens.prayer.QiblaScreen
+import com.example.sholatyuk.presentation.screens.splash.SplashScreen
 
 @Composable
 fun AppNavHost(
@@ -21,9 +22,19 @@ fun AppNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Route.Home,
+        startDestination = Route.Splash,
         modifier = modifier
     ) {
+        composable<Route.Splash> {
+            SplashScreen(
+                onNavigateToHome = {
+                    navController.navigate(Route.Home) {
+                        popUpTo(Route.Splash) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable<Route.Home> {
             HomeScreen(
                 onNavigateToShalat = {
