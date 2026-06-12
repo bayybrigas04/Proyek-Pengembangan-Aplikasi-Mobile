@@ -10,9 +10,12 @@ import com.example.sholatyuk.data.remote.api.AladhanService
 import com.example.sholatyuk.data.repository.AIRepositoryImpl
 import com.example.sholatyuk.data.repository.PrayerRepositoryImpl
 import com.example.sholatyuk.data.repository.KajianRepositoryImpl
+import com.example.sholatyuk.data.repository.DoaRepositoryImpl
 import com.example.sholatyuk.domain.repository.AIRepository
 import com.example.sholatyuk.domain.repository.PrayerRepository
 import com.example.sholatyuk.domain.repository.KajianRepository
+import com.example.sholatyuk.domain.repository.DoaRepository
+import com.example.sholatyuk.domain.usecase.prayer.ScheduleAdzanUseCase   // ← Use case notifikasi
 import com.example.sholatyuk.presentation.screens.home.HomeViewModel
 import com.example.sholatyuk.presentation.screens.islamai.IslamAIViewModel
 import com.example.sholatyuk.presentation.screens.prayer.PrayerViewModel
@@ -41,17 +44,23 @@ val sharedModules = module {
     single { get<DataStoreFactory>().create() }
 
     // ── Repositories ──────────────────────────────────────────────
-    single<AIRepository> { AIRepositoryImpl(get(), get()) }
+    single<AIRepository>     { AIRepositoryImpl(get(), get()) }
     single<PrayerRepository> { PrayerRepositoryImpl(get(), get()) }
     single<KajianRepository> { KajianRepositoryImpl(get()) }
+    single<DoaRepository>    { DoaRepositoryImpl(database = get(), httpClient = get()) }
+
+    // ── Use Cases ─────────────────────────────────────────────────
+    // FIX: ScheduleAdzanUseCase hanya butuh 1 parameter: AdzanScheduler
+    // AdzanScheduler di-binding di AndroidModule → single<AdzanScheduler> { AdzanSchedulerImpl(get()) }
+    factory { ScheduleAdzanUseCase(get()) }
 
     // ── ViewModels ────────────────────────────────────────────────
-    factory { HomeViewModel(get(), get()) }
+    factory { HomeViewModel(get(), get(), get()) }   // PrayerRepository, LocationService, ScheduleAdzanUseCase
     factory { PrayerViewModel(get(), get()) }
     factory { IslamAIViewModel(get()) }
-    factory { DoaViewModel() }
+    factory { DoaViewModel(get()) }
     factory { KajianViewModel(get()) }
-    single { ProfileViewModel() }
+    single  { ProfileViewModel() }
 }
 
 fun initKoin(

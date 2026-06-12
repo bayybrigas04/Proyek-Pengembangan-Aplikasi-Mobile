@@ -6,9 +6,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute // <-- Import ditambahkan
 import com.example.sholatyuk.presentation.screens.home.HomeScreen
 import com.example.sholatyuk.presentation.screens.prayer.PrayerScreen
 import com.example.sholatyuk.presentation.screens.doa.DoaScreen
+import com.example.sholatyuk.presentation.screens.doa.DoaDetailScreen // <-- Import ditambahkan
 import com.example.sholatyuk.presentation.screens.islamai.IslamAIScreen
 import com.example.sholatyuk.presentation.screens.profile.ProfileScreen
 import com.example.sholatyuk.presentation.screens.kajian.KajianScreen
@@ -57,6 +59,7 @@ fun AppNavHost(
                 }
             )
         }
+
         composable<Route.Shalat> {
             PrayerScreen(
                 onNavigateToHome = {
@@ -70,6 +73,8 @@ fun AppNavHost(
                 }
             )
         }
+
+        // --- BLOK DOA YANG DIPERBARUI ---
         composable<Route.Doa> {
             DoaScreen(
                 onNavigateToHome = {
@@ -80,9 +85,25 @@ fun AppNavHost(
                 },
                 onNavigateToIslamAI = {
                     navController.navigate(Route.IslamAI) { popUpTo(Route.Home) { saveState = true }; launchSingleTop = true; restoreState = true }
+                },
+                onNavigateToDetail = { doaId ->
+                    // Jika doa diklik, pergi ke halaman detail
+                    navController.navigate(Route.DoaDetail(doaId))
                 }
             )
         }
+
+        // --- RUTE BARU UNTUK DOA DETAIL ---
+        composable<Route.DoaDetail> { backStackEntry ->
+            // Mengambil ID doa yang dikirim dari rute navigasi
+            val detail: Route.DoaDetail = backStackEntry.toRoute()
+
+            DoaDetailScreen(
+                doaId = detail.id,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
         composable<Route.IslamAI> {
             IslamAIScreen(
                 onNavigateToHome = {
