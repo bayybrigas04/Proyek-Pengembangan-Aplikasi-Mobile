@@ -15,13 +15,14 @@ import com.example.sholatyuk.domain.repository.AIRepository
 import com.example.sholatyuk.domain.repository.PrayerRepository
 import com.example.sholatyuk.domain.repository.KajianRepository
 import com.example.sholatyuk.domain.repository.DoaRepository
-import com.example.sholatyuk.domain.usecase.prayer.ScheduleAdzanUseCase   // ← Use case notifikasi
+import com.example.sholatyuk.domain.usecase.prayer.ScheduleAdzanUseCase
 import com.example.sholatyuk.presentation.screens.home.HomeViewModel
 import com.example.sholatyuk.presentation.screens.islamai.IslamAIViewModel
 import com.example.sholatyuk.presentation.screens.prayer.PrayerViewModel
 import com.example.sholatyuk.presentation.screens.doa.DoaViewModel
 import com.example.sholatyuk.presentation.screens.profile.ProfileViewModel
 import com.example.sholatyuk.presentation.screens.kajian.KajianViewModel
+import com.example.sholatyuk.presentation.screens.qibla.QiblaViewModel
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
@@ -50,17 +51,16 @@ val sharedModules = module {
     single<DoaRepository>    { DoaRepositoryImpl(database = get(), httpClient = get()) }
 
     // ── Use Cases ─────────────────────────────────────────────────
-    // FIX: ScheduleAdzanUseCase hanya butuh 1 parameter: AdzanScheduler
-    // AdzanScheduler di-binding di AndroidModule → single<AdzanScheduler> { AdzanSchedulerImpl(get()) }
     factory { ScheduleAdzanUseCase(get()) }
 
     // ── ViewModels ────────────────────────────────────────────────
-    factory { HomeViewModel(get(), get(), get()) }   // PrayerRepository, LocationService, ScheduleAdzanUseCase
+    factory { HomeViewModel(get(), get(), get()) }
     factory { PrayerViewModel(get(), get()) }
     factory { IslamAIViewModel(get()) }
     factory { DoaViewModel(get()) }
     factory { KajianViewModel(get()) }
     single  { ProfileViewModel() }
+    factory { QiblaViewModel(get(), get()) }   // ← LocationService + CompassSensor
 }
 
 fun initKoin(
